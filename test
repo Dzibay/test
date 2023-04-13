@@ -1,16 +1,16 @@
 def mapping(a, b):
-    return (a // TILE) * TILE, (b // 2) * TILE
+    return (a // TILE) * TILE, (b // TILE) * TILE
 
 
-def ray_casting(screen, player_pos, player_angle):
-    global depth_v, depth_h
-    cur_angle = player_angle - HALF_FOV
+def ray_casting(sc, player_pos, player_angle):
     ox, oy = player_pos
     xm, ym = mapping(ox, oy)
-
+    cur_angle = player_angle - HALF_FOV
     for ray in range(NUM_RAYS):
         sin_a = math.sin(cur_angle)
         cos_a = math.cos(cur_angle)
+        sin_a = sin_a if sin_a else 0.000001
+        cos_a = cos_a if cos_a else 0.000001
 
         # verticals
         x, dx = (xm + TILE, 1) if cos_a >= 0 else (xm, -1)
@@ -30,11 +30,11 @@ def ray_casting(screen, player_pos, player_angle):
                 break
             y += dy * TILE
 
-        # choice
+        # projection
         depth = depth_v if depth_v < depth_h else depth_h
         depth *= math.cos(player_angle - cur_angle)
         proj_height = PROJ_COEFF / depth
         c = 255 / (1 + depth * depth * 0.00002)
         color = (c, c // 2, c // 3)
-        pygame.draw.rect(screen, color, (ray * SCALE, HALF_HEIGHT - proj_height // 2, SCALE, proj_height))
+        pygame.draw.rect(sc, color, (ray * SCALE, HALF_HEIGHT - proj_height // 2, SCALE, proj_height))
         cur_angle += DELTA_ANGLE
